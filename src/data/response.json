@@ -1,0 +1,66 @@
+{
+    "address": {
+        "street": "NA",
+        "city": "NA",
+        "state": "NA",
+        "zipCode": "NA",
+        "country": "India"
+    },
+    "emergencyContact": {
+        "name": "NA",
+        "relationship": "meow",
+        "phone": "NA"
+    },
+    "medicalProfile": {
+        "allergies": [],
+        "chronicConditions": [],
+        "medications": [],
+        "familyHistory": []
+    },
+    "accountSettings": {
+        "language": "English",
+        "timeZone": "Asia/Kolkata",
+        "notifications": {
+            "email": true,
+            "sms": true,
+            "app": true,
+            "appointmentReminders": true,
+            "medicationReminders": false,
+            "systemUpdates": true,
+            "_id": "689545ebdd3437a7c88a2931"
+        },
+        "privacy": {
+            "profileVisibility": "Colleagues only",
+            "dataSharing": "Limited",
+            "researchParticipation": false,
+            "_id": "689545ebdd3437a7c88a2930"
+        },
+        "accessibility": {
+            "highContrast": false,
+            "largeText": false,
+            "screenReader": false,
+            "_id": "689545ebdd3437a7c88a292f"
+        },
+        "connectedDevices": []
+    },
+    "securitySettings": {
+        "twoFactorEnabled": true,
+        "loginHistory": [],
+        "lastPasswordChange": null,
+        "recoveryEmail": ""
+    },
+    "_id": "689416032a40852dd3e9f113",
+    "firstName": "Yaseen",
+    "lastName": "Aghaa",
+    "role": "doctor",
+    "certificatePath": "user.routes.js",
+    "termsAccepted": true,
+    "specialization": "Cardiology",
+    "emailId": "shafiagha789@gmail.com",
+    "phone": "8884552955",
+    "biography": "coderr",
+    "avatar": "",
+    "bloodType": "O-",
+    "dateOfBirth": "2025-08-08",
+    "gender": "Male"
+}

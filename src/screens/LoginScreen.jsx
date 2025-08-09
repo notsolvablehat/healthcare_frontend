@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { Heart, ShieldCheck, Mail, Lock, Eye, EyeOff, Smartphone, Fingerprint } from 'lucide-react';
 
@@ -8,10 +10,33 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 
+import { login } from '../services/authService';
+import UserContext from '../context/UserContext';
+import { initializeData } from "../redux/userSlice"
 
 function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const [emailId, setEmailId] = useState("");
+  const {loggedIn ,setIsLoggedIn} = useContext(UserContext);
+
+  const dispatch = useDispatch();
+
   const navigate = useNavigate();
+
+  const handleLogin = async () => {
+    if (emailId && password) {
+      try {
+        const response = await login({ emailId, password });
+        dispatch(initializeData(response.data));
+        setIsLoggedIn(true);
+        navigate("/profile");
+      } catch (error) {
+        console.error("Login failed:", error);
+      }
+    }
+  };
+
 
   return (
     <div className="w-full max-w-md space-y-6">
@@ -25,14 +50,14 @@ function SignInForm() {
           <Label htmlFor="email">Email address *</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input id="email" type="email" placeholder="doctor@example.com" required className="pl-10" />
+            <Input id="email" type="email" placeholder="doctor@example.com" required className="pl-10" value={emailId} onChange={(e) => setEmailId(e.target.value)} />
           </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">Password *</Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="···········" required className="pl-10 pr-10" />
+            <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="···········" required className="pl-10 pr-10" value={password} onChange={(e) => setPassword(e.target.value)} />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
@@ -54,7 +79,7 @@ function SignInForm() {
         </a>
       </div>
 
-      <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer">
+      <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer" onClick={handleLogin}>
         Sign In
       </Button>
 
