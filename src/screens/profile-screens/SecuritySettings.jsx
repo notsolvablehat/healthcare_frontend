@@ -5,12 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { useSelector } from 'react-redux';
 
-const initialLoginHistory = [
-    { id: 1, dateTime: 'Jun 15, 2023, 02:00 PM', deviceType: 'phone', device: 'iPhone 13 Pro', location: 'Boston, MA', ip: '192.168.1.1', status: 'Success' },
-    { id: 2, dateTime: 'Jun 14, 2023, 11:15 PM', deviceType: 'laptop', device: 'MacBook Pro', location: 'Boston, MA', ip: '192.168.1.1', status: 'Success' },
-    { id: 3, dateTime: 'Jun 13, 2023, 02:45 PM', deviceType: 'desktop', device: 'Windows PC', location: 'Boston Medical Center', ip: '10.0.0.25', status: 'Success' },
-];
 
 const DeviceIcon = ({ type }) => {
     switch (type) {
@@ -23,7 +19,8 @@ const DeviceIcon = ({ type }) => {
 
 // --- MAIN COMPONENT ---
 export default function SecuritySettings() {
-    const [loginHistory, setLoginHistory] = useState(initialLoginHistory);
+    const securitySettings = useSelector(state => state.user.securitySettings.data);
+    const [loginHistory, setLoginHistory] = useState(securitySettings.loginHistory);
 
     return (
         <div className="space-y-6">

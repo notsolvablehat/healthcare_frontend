@@ -1,10 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 export const initialState = {
-    personalInfo: {},
-    medicalProfile: {},
-    accountSettings: {},
-    securitySettings: {},
+    personalInfo: {data: {}, isEdited: false},
+    medicalProfile: {data: {}, isEdited: false},
+    accountSettings: {data: {}, isEdited: false},
+    securitySettings: {data: {}, isEdited: false},
 };
 
 const userSlice = createSlice({
@@ -15,20 +15,9 @@ const userSlice = createSlice({
             const rawData = action.payload;
             const { firstName, lastName, role, specialization, emailId, phone: primaryPhone, biography, bloodType, dateOfBirth, gender, avatar } = rawData;
             const { street, city, state: addressState, zipCode, country } = rawData.address;
-            const { name, relatioship, phone: emergencyPhone } = rawData.emergencyContact;
+            const { name, relationship, phone: emergencyPhone } = rawData.emergencyContact;
 
-            state.personalInfo = {
-                firstName,
-                lastName,
-                role,
-                specialization,
-                emailId,
-                primaryPhone,
-                biography,
-                bloodType,
-                dateOfBirth,
-                gender,
-                avatar,
+            state.personalInfo.data = { firstName, lastName, role, specialization, emailId, primaryPhone, biography, bloodType, dateOfBirth, gender, avatar,
                 address: {
                     street,
                     city,
@@ -38,17 +27,52 @@ const userSlice = createSlice({
                 },
                 emergencyContact: {
                     name,
-                    relatioship,
+                    relationship,
                     phone: emergencyPhone
                 }
             };
-            state.medicalProfile = rawData.medicalProfile;
-            state.accountSettings = rawData.accountSettings;
-            state.securitySettings = rawData.securitySettings;
-            console.log("State Initialized: ", JSON.parse(JSON.stringify(state)));
+
+            state.medicalProfile.data = rawData.medicalProfile;
+
+            state.accountSettings.data = rawData.accountSettings;
+
+            state.securitySettings.data = rawData.securitySettings;
+
+        },
+        updatePersonalData: (state, action) => {
+            state.personalInfo.data = action.payload;
+            state.personalInfo.isEdited = true;
+        },
+        updateMedicalData: (state, action) => {
+            state.medicalProfile.data = {
+                ...state.medicalProfile.data,
+                ...action.payload
+            };
+            state.medicalProfile.isEdited = true;
+        },
+        updateAccountData: (state, action) => {
+            state.accountSettings.data = action.payload;
+            state.accountSettings.isEdited = true;
+        },
+        updateSecurityData: (state, action) => {
+            state.securitySettings.data = action.payload;
+            state.securitySettings.isEdited = true;
+        },
+        setStateEdited: (state, action) => {
+            state.personalInfo.isEdited = false;
+            state.medicalProfile.isEdited = false;
+            state.accountSettings.isEdited = false;
+            state.securitySettings.isEdited = false;
         }
     }
 });
 
-export const { initializeData } = userSlice.actions;
+export const { 
+    initializeData, 
+    updatePersonalData,
+    updateMedicalData, 
+    updateAccountData, 
+    updateSecurityData,
+    setStateEdited,
+} = userSlice.actions;
 export const userReducer = userSlice.reducer;

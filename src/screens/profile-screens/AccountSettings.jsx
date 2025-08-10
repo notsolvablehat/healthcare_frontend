@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Smartphone, Laptop, Trash2, Plus, Sparkles } from 'lucide-react';
+import parse from 'html-react-parser';
 
 import {
   Card,
@@ -26,12 +27,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSelector, useDispatch } from 'react-redux';
 
-// --- INITIAL DATA ---
-const initialDevices = [
-    { id: 1, type: 'phone', name: 'iPhone 13 Pro', lastActive: 'Jun 15, 2023, 08:00 PM', location: 'Boston, MA' },
-    { id: 2, type: 'laptop', name: 'Macbook Pro', lastActive: 'Jun 15, 2023, 02:45 PM', location: 'Boston, MA' },
-];
+import { updateAccountData } from '../../redux/userSlice';
+import { requestAccountInformation } from '../../services/llmService';
 
 const DeviceIcon = ({ type }) => {
     if (type === 'phone') return <Smartphone className="h-5 w-5 text-muted-foreground" />;
@@ -39,101 +38,135 @@ const DeviceIcon = ({ type }) => {
     return null;
 };
 
-// --- MAIN COMPONENT ---
 export default function AccountSettings() {
-    // State for all settings
+    const userAccountSettings = useSelector(state => state.user.accountSettings.data);
+    // console.log(userAccountSettings);
+    const dispatch = useDispatch();
+
     const [preferences, setPreferences] = useState({
-        language: 'english',
-        timeZone: 'et',
-        largeText: false,
-        highContrast: false,
-        screenReaderSupport: true,
+        language: userAccountSettings?.language,
+        timeZone: userAccountSettings?.timeZone,
+        largeText: userAccountSettings?.accessibility.largeText,
+        highContrast: userAccountSettings?.accessibility.highContrast,
+        screenReaderSupport: userAccountSettings?.accessibility.screenReader
     });
     const [privacy, setPrivacy] = useState({
-        profileVisibility: 'colleagues',
-        dataSharing: 'limited',
-        researchParticipation: true,
+        profileVisibility: userAccountSettings?.privacy.profileVisibility,
+        dataSharing: userAccountSettings?.privacy.dataSharing,
+        researchParticipation: userAccountSettings?.privacy.researchParticipation,
     });
     const [notifications, setNotifications] = useState({
-        email: true,
-        sms: true,
-        inApp: true,
-        appointmentReminders: true,
-        medicationReminders: false,
-        systemUpdates: true,
+        email: userAccountSettings?.notifications.email,
+        sms: userAccountSettings?.notifications.sms,
+        inApp: userAccountSettings?.notifications.app,
+        appointmentReminders: userAccountSettings?.notifications.appointmentReminders,
+        medicationReminders: userAccountSettings?.notifications.medicationReminders,
+        systemUpdates: userAccountSettings?.notifications.systemUpdates,
     });
-    const [devices, setDevices] = useState(initialDevices);
+    const [devices, setDevices] = useState(userAccountSettings.connectedDevices);
 
-    // New state for Gemini AI feature
+    // Gemini AI feature
     const [explanation, setExplanation] = useState('');
     const [isExplanationLoading, setIsExplanationLoading] = useState(false);
     const [isExplanationModalOpen, setIsExplanationModalOpen] = useState(false);
 
+    // Helper to log the full object
+    const logUpdatedSettings = (updated) => {
+        const fullSettings = {
+            language: updated.preferences.language,
+            timeZone: updated.preferences.timeZone,
+            notifications: {
+                email: updated.notifications.email,
+                sms: updated.notifications.sms,
+                app: updated.notifications.inApp,
+                appointmentReminders: updated.notifications.appointmentReminders,
+                medicationReminders: updated.notifications.medicationReminders,
+                systemUpdates: updated.notifications.systemUpdates,
+                _id: userAccountSettings?.notifications?._id
+            },
+            privacy: {
+                profileVisibility: updated.privacy.profileVisibility,
+                dataSharing: updated.privacy.dataSharing,
+                researchParticipation: updated.privacy.researchParticipation,
+                _id: userAccountSettings?.privacy?._id
+            },
+            accessibility: {
+                highContrast: updated.preferences.highContrast,
+                largeText: updated.preferences.largeText,
+                screenReader: updated.preferences.screenReaderSupport,
+                _id: userAccountSettings?.accessibility?._id
+            },
+            connectedDevices: updated.devices || []
+        };
+        dispatch(updateAccountData(fullSettings));
+    };
+
     const handlePreferenceChange = (key, value) => {
-        setPreferences(prev => ({ ...prev, [key]: value }));
+        const updatedPrefs = { ...preferences, [key]: value };
+        setPreferences(updatedPrefs);
+        logUpdatedSettings({ preferences: updatedPrefs, privacy, notifications, devices });
     };
 
     const handlePrivacyChange = (key, value) => {
-        setPrivacy(prev => ({ ...prev, [key]: value }));
+        const updatedPrivacy = { ...privacy, [key]: value };
+        setPrivacy(updatedPrivacy);
+        logUpdatedSettings({ preferences, privacy: updatedPrivacy, notifications, devices });
     };
 
     const handleNotificationChange = (key, value) => {
-        setNotifications(prev => ({ ...prev, [key]: value }));
-    };
-    
-    const removeDevice = (deviceId) => {
-        setDevices(prev => prev.filter(device => device.id !== deviceId));
+        const updatedNotifs = { ...notifications, [key]: value };
+        setNotifications(updatedNotifs);
+        logUpdatedSettings({ preferences, privacy, notifications: updatedNotifs, devices });
     };
 
-    // --- Gemini API Call ---
+    const removeDevice = (deviceId) => {
+        const updatedDevices = devices.filter(device => device.id !== deviceId);
+        setDevices(updatedDevices);
+        logUpdatedSettings({ preferences, privacy, notifications, devices: updatedDevices });
+    };
+
+    // Gemini API call
     const handleExplainSettings = async () => {
         setIsExplanationModalOpen(true);
         setIsExplanationLoading(true);
-        setExplanation(''); // Clear previous explanation
+        setExplanation('');
 
         const prompt = `
             Explain the following privacy settings for a user of a medical application in simple, easy-to-understand terms.
-            Keep the explanation concise and clear. Format the output using markdown with headings for each setting.
+            Keep the explanation concise and clear (in about 40 words). Format the output using <h3> for headings and <span> and <br/>. Donot use anything else.
 
-            - **Profile Visibility**: Currently set to "${privacy.profileVisibility}". Explain what this means for who can see their profile.
-            - **Data Sharing**: Currently set to "${privacy.dataSharing}". Explain what this means for how their medical data is shared with providers.
-            - **Research Participation**: Currently set to "${privacy.researchParticipation ? 'Enabled' : 'Disabled'}". Explain what it means to participate in anonymized medical research.
+            - **Profile Visibility**: Currently set to "${privacy.profileVisibility}".
+            - **Data Sharing**: Currently set to "${privacy.dataSharing}".
+            - **Research Participation**: Currently set to "${privacy.researchParticipation ? 'Enabled' : 'Disabled'}".
         `;
 
         let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
-        const payload = { contents: chatHistory };
-        const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        const payload = { contents: chatHistory,  profileVisibility: privacy.profileVisibility, dataSharing: privacy.dataSharing, researchParticipation: privacy.researchParticipation};
 
         try {
-            let response;
-            let delay = 1000;
-            for (let i = 0; i < 5; i++) {
-                response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (response.ok) break;
-                await new Promise(resolve => setTimeout(resolve, delay));
-                delay *= 2;
-            }
+            // let response;
+            // let delay = 1000;
+            // for (let i = 0; i < 5; i++) {
+            //     response = await fetch(apiUrl, {
+            //         method: 'POST',
+            //         headers: { 'Content-Type': 'application/json' },
+            //         body: JSON.stringify(payload)
+            //     });
+            //     if (response.ok) break;
+            //     await new Promise(resolve => setTimeout(resolve, delay));
+            //     delay *= 2;
+            // }
+            // if (!response || !response.ok) throw new Error(`API request failed with status ${response?.status}`);
 
-            if (!response || !response.ok) {
-                throw new Error(`API request failed with status ${response?.status}`);
-            }
+            // const result = await response.json();
+            // const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+            // setExplanation(text || "Sorry, I couldn't generate an explanation at this time.");
 
-            const result = await response.json();
-            const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-            if (text) {
-              setExplanation(text);
-            } else {
-              setExplanation("Sorry, I couldn't generate an explanation at this time. Please try again later.");
-            }
+            const response = await requestAccountInformation(payload)
+            setExplanation(response.data || "Sorry, I couldn't generate an explanation at this time.");
         } catch (error) {
             console.error("Error calling Gemini API:", error);
-            setExplanation("There was an error getting the explanation. Please check your connection and try again.");
+            setExplanation("There was an error getting the explanation. Please try again later.");
         } finally {
             setIsExplanationLoading(false);
         }
@@ -154,8 +187,8 @@ export default function AccountSettings() {
                                     <Select value={preferences.language} onValueChange={(val) => handlePreferenceChange('language', val)}>
                                         <SelectTrigger id="language"><SelectValue placeholder="Select..." /></SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="english">English</SelectItem>
-                                            <SelectItem value="spanish">Spanish</SelectItem>
+                                            <SelectItem value="English">English</SelectItem>
+                                            <SelectItem value="Spanish">Spanish</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -165,6 +198,7 @@ export default function AccountSettings() {
                                         <SelectTrigger id="timezone"><SelectValue placeholder="Select..." /></SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="et">Eastern Time (ET)</SelectItem>
+                                            <SelectItem value="Asia/Kolkata">Asia/Kolkata</SelectItem>
                                             <SelectItem value="pt">Pacific Time (PT)</SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -211,9 +245,9 @@ export default function AccountSettings() {
                             <Select value={privacy.profileVisibility} onValueChange={(val) => handlePrivacyChange('profileVisibility', val)}>
                                 <SelectTrigger id="profile-visibility"><SelectValue placeholder="Select..." /></SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="everyone">Everyone</SelectItem>
-                                    <SelectItem value="colleagues">Colleagues only</SelectItem>
-                                    <SelectItem value="private">Private</SelectItem>
+                                    <SelectItem value="Everyone">Everyone</SelectItem>
+                                    <SelectItem value="Colleagues only">Colleagues only</SelectItem>
+                                    <SelectItem value="Private">Private</SelectItem>
                                 </SelectContent>
                             </Select>
                             <p className="text-xs text-muted-foreground mt-1">Control who can see your profile information.</p>
@@ -223,9 +257,9 @@ export default function AccountSettings() {
                             <Select value={privacy.dataSharing} onValueChange={(val) => handlePrivacyChange('dataSharing', val)}>
                                 <SelectTrigger id="data-sharing"><SelectValue placeholder="Select..." /></SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="full">Full</SelectItem>
-                                    <SelectItem value="limited">Limited - Share only essential data</SelectItem>
-                                    <SelectItem value="none">Do not share</SelectItem>
+                                    <SelectItem value="Full">Full</SelectItem>
+                                    <SelectItem value="Limited">Limited - Share only essential data</SelectItem>
+                                    <SelectItem value="None">Do not share</SelectItem>
                                 </SelectContent>
                             </Select>
                             <p className="text-xs text-muted-foreground mt-1">Manage how your data is shared with providers.</p>
@@ -247,7 +281,7 @@ export default function AccountSettings() {
                         <div className="space-y-4">
                             {devices.map(device => (
                                 <div key={device.id} className="flex items-center space-x-4">
-                                    <DeviceIcon type={device.type} />
+                                    <DeviceIcon type={device.deviceType|| ""} />
                                     <div className="flex-1">
                                         <p className="font-medium text-sm">{device.name}</p>
                                         <p className="text-xs text-muted-foreground">Last active: {device.lastActive} • {device.location}</p>
@@ -270,9 +304,7 @@ export default function AccountSettings() {
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>Understanding Your Privacy Settings</DialogTitle>
-                        <DialogDescription>
-                            Here’s a simple explanation of your current choices.
-                        </DialogDescription>
+                        <DialogDescription>Here’s a simple explanation of your current choices.</DialogDescription>
                     </DialogHeader>
                     <div className="py-4 prose prose-sm max-w-none">
                         {isExplanationLoading ? (
@@ -283,7 +315,9 @@ export default function AccountSettings() {
                                 <Skeleton className="h-4 w-1/2" />
                             </div>
                         ) : (
-                             <div dangerouslySetInnerHTML={{ __html: explanation.replace(/\n/g, '<br />').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+                            <>
+                                <div>{parse(explanation)}</div>
+                            </>
                         )}
                     </div>
                     <DialogFooter>

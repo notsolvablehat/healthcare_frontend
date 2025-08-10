@@ -1,0 +1,181 @@
+[
+  {
+    "clinicName": "Blackacre Hospital",
+    "dateOfBirth": "NA",
+    "firstName": "Ah Kow",
+    "gender": "NA",
+    "lastName": "Tan",
+    "medicalProfile": {
+      "allergies": [],
+      "chronicConditions": [
+        {
+          "diagnosedDate": "1990",
+          "name": "Hypertension",
+          "status": "Chronic"
+        },
+        {
+          "diagnosedDate": "1990",
+          "name": "Hyperlipidemia",
+          "status": "Chronic"
+        },
+        {
+          "diagnosedDate": "2005",
+          "name": "Stroke",
+          "status": "Chronic"
+        },
+        {
+          "diagnosedDate": "NA",
+          "name": "Cardiomyopathy",
+          "status": "Chronic"
+        },
+        {
+          "diagnosedDate": "NA",
+          "name": "Cardiac failure",
+          "status": "Chronic"
+        },
+        {
+          "diagnosedDate": "NA",
+          "name": "Chronic renal disease",
+          "status": "Chronic"
+        }
+      ],
+      "clinicalSummary": {
+        "clinicalHistory": "Mr Tan Ah Kow is a 55-year-old divorced, unemployed man living with his son. He has a history of hypertension and hyperlipidemia since 1990, and suffered strokes in 2005 and again in 2010. He also developed heart problems (cardiomyopathy), cardiac failure, and chronic renal disease. He was admitted to ABC Hospital in April 2010 for a stroke, then transferred to XYZ Hospital for rehabilitation. He was later referred to Blackacre Hospital in November 2010 for follow-up, where he presented with behavioral and psychological symptoms secondary to Dementia. His son informed that Mr Tan is incontinent and unable to bathe or use the toilet on his own, but can feed himself. His cognitive and physical state has gradually deteriorated over the years.",
+        "diagnosis": ["Dementia", "Stroke"],
+        "examinationFindings": "Mr Tan was brought in via wheelchair and had a euthymic mood with no psychotic symptoms. He was disoriented to time, place, and person, unable to state the correct date, day, or year, and could not tell time from a watch. He misstated his age (50 instead of 55), could not recall his birthday, and gave an incorrect address for his residence. He demonstrated an inability to perform simple arithmetic, recognize currency, or recall details about his property ownership or medical conditions/medications.",
+        "prognosis": "His cognitive functions are unlikely to improve and will most likely worsen over time, as there is no treatment to reverse his dementia."
+      },
+      "familyHistory": [],
+      "labResults": [],
+      "medications": []
+    },
+    "patientId": "S1111111X",
+    "physicianName": "Tan Ah Moi",
+    "reportDate": "2015-07-20"
+  },
+  {
+    "clinicName": "Freiburg Medical Laboratory Middle East (L.L.C.)",
+    "dateOfBirth": "01-01-1973",
+    "firstName": "NA",
+    "gender": "female",
+    "lastName": "NA",
+    "medicalProfile": {
+        "allergies": [],
+        "chronicConditions": [],
+        "clinicalSummary": {
+        "clinicalHistory": "NA",
+        "diagnosis": [
+            "No sign of diabetic glucose metabolism (glycosylation)",
+            "Decreased HbA1c levels are observed in hemolytic anemia"
+        ],
+        "examinationFindings": "NA",
+        "prognosis": "NA"
+        },
+        "familyHistory": [],
+        "labResults": [
+        {
+            "flag": "Normal",
+            "referenceRange": "70 - 99",
+            "testName": "Glucose fasting (PHO)",
+            "unit": "mg/dl",
+            "value": "83"
+        },
+        {
+            "flag": "High",
+            "referenceRange": "100 - 200",
+            "testName": "Cholesterol, total (PHO)",
+            "unit": "mg/dl",
+            "value": "221"
+        },
+        {
+            "flag": "High",
+            "referenceRange": "< 150",
+            "testName": "Triglycerides (PHO)",
+            "unit": "mg/dl",
+            "value": "1315"
+        },
+        {
+            "flag": "Low",
+            "referenceRange": "> 50",
+            "testName": "HDL Cholesterol, direct (PHO)",
+            "unit": "mg/dl",
+            "value": "22.5"
+        },
+        {
+            "flag": "Normal",
+            "referenceRange": "< 100",
+            "testName": "LDL Cholesterol, direct (PHO)",
+            "unit": "mg/dl",
+            "value": "36"
+        },
+        {
+            "flag": "High",
+            "referenceRange": "2.6-5.1",
+            "testName": "Cholesterol, total (PHO)",
+            "unit": "mmol/l",
+            "value": "5.7"
+        },
+        {
+            "flag": "High",
+            "referenceRange": "< 1.7",
+            "testName": "Triglycerides (PHO)",
+            "unit": "mmol/l",
+            "value": "14.8"
+        },
+        {
+            "flag": "Low",
+            "referenceRange": ">1.3",
+            "testName": "HDL Cholesterol, direct (PHO)",
+            "unit": "mmol/l",
+            "value": "0.6"
+        },
+        {
+            "flag": "Normal",
+            "referenceRange": "< 2.6",
+            "testName": "LDL Cholesterol, direct (PHO)",
+            "unit": "mmol/l",
+            "value": "0.9"
+        },
+        {
+            "flag": "Normal",
+            "referenceRange": "3.5-5.0",
+            "testName": "Albumin (PHO)",
+            "unit": "g/dl",
+            "value": "4.5"
+        },
+        {
+            "flag": "Normal",
+            "referenceRange": "6-20",
+            "testName": "Urea Nitrogen (PHO)",
+            "unit": "mg/dl",
+            "value": "9"
+        },
+        {
+            "flag": "Normal",
+            "referenceRange": "0.4-0.9",
+            "testName": "Creatinine (PHO)",
+            "unit": "mg/dl",
+            "value": "0.7"
+        },
+        {
+            "flag": "Normal",
+            "referenceRange": "6.4-8.3",
+            "testName": "Total Protein (PHO)",
+            "unit": "g/dl",
+            "value": "7.1"
+        },
+        {
+            "flag": "Normal",
+            "referenceRange": "2.9-4.2",
+            "testName": "Hb A1c (TURB)",
+            "unit": "%",
+            "value": "3.8"
+        }
+        ],
+        "medications": []
+    },
+    "patientId": "380032",
+    "physicianName": "Dr. M. Jaksch",
+    "reportDate": "2019-04-28"
+    }
+]

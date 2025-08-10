@@ -1,0 +1,26 @@
+{
+    "language": "English",
+    "timeZone": "Asia/Kolkata",
+    "notifications": {
+        "email": true,
+        "sms": true,
+        "app": true,
+        "appointmentReminders": true,
+        "medicationReminders": false,
+        "systemUpdates": true,
+        "_id": "689545ebdd3437a7c88a2931"
+    },
+    "privacy": {
+        "profileVisibility": "Colleagues only",
+        "dataSharing": "Limited",
+        "researchParticipation": false,
+        "_id": "689545ebdd3437a7c88a2930"
+    },
+    "accessibility": {
+        "highContrast": false,
+        "largeText": false,
+        "screenReader": false,
+        "_id": "689545ebdd3437a7c88a292f"
+    },
+    "connectedDevices": []
+}

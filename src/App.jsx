@@ -7,19 +7,20 @@ import { getMe } from './services/authService';
 import { initializeData } from './redux/userSlice';
 import {UserRoutes} from './routes/Routes';
 import UserContext from './context/UserContext';
+import useAutoSave from './hooks/useAutoSave';
 
 function App() {
   const { loggedIn, setIsLoggedIn } = useContext(UserContext);
   const dispatch = useDispatch();
 
+  useAutoSave(2500);
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
           const response = await getMe();
-          console.log(response)
           if (response) {
             setIsLoggedIn(true);
-            console.log(loggedIn)
             dispatch(initializeData(response));
           }
       } catch (error) {

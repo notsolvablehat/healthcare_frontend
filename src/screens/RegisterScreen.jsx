@@ -15,8 +15,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { register } from '../services/authService';
 
-function DoctorFields({ onFileChange, fileName }) {
+function DoctorFields({ onFileChange, fileName, onSpecializationChange }) {
     const specializations = [
         "Cardiology", "Dermatology", "Neurology", "Orthopedics",
         "Pediatrics", "Oncology", "Radiology", "General Surgery", "Other"
@@ -26,7 +27,6 @@ function DoctorFields({ onFileChange, fileName }) {
         <>
             <div className="space-y-2">
                 <Label>Medical Certificate</Label>
-
                 <Input
                     id="certificate-input"
                     type="file"
@@ -34,7 +34,6 @@ function DoctorFields({ onFileChange, fileName }) {
                     className="hidden"
                     onChange={onFileChange}
                 />
-
                 <Label
                     htmlFor="certificate-input"
                     className="flex items-center justify-between h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-muted-foreground ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 cursor-pointer"
@@ -49,21 +48,24 @@ function DoctorFields({ onFileChange, fileName }) {
                         Browse
                     </span>
                 </Label>
-
-                <p className="text-xs text-muted-foreground">Please upload your graduation certificate.</p>
+                <p className="text-xs text-muted-foreground">
+                    Please upload your graduation certificate.
+                </p>
             </div>
             <div className="space-y-2">
                 <Label htmlFor="specialization">Specialization</Label>
-                 <Select required>
+                <Select required onValueChange={onSpecializationChange}>
                     <SelectTrigger id="specialization" className="w-full cursor-pointer">
                         <Stethoscope className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                         <div className='pl-0'>
-                             <SelectValue placeholder="Select your expertise" className="cursor-pointer" />
+                             <SelectValue placeholder="Select your expertise" />
                         </div>
                     </SelectTrigger>
-                    <SelectContent className="cursor-pointer">
+                    <SelectContent>
                         {specializations.map(skill => (
-                            <SelectItem key={skill} value={skill.toLowerCase().replace(' ', '-')} className="cursor-pointer">{skill}</SelectItem>
+                            <SelectItem key={skill} value={skill}>
+                                {skill}
+                            </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
@@ -75,74 +77,114 @@ function DoctorFields({ onFileChange, fileName }) {
 function RegisterForm() {
     const [showPassword, setShowPassword] = useState(false);
     const [role, setRole] = useState("");
-    const [certificateName, setCertificateName] = useState(null);
+    const [certificatePath, setCertificatePath] = useState(null);
+    const [specialization, setSpecialization] = useState("");
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [emailId, setEmailId] = useState("");
+    const [password, setPassword] = useState("");
+    const [termsAcc, setTermsAcc] = useState(false);
     const navigate = useNavigate();
 
     const handleFileChange = (e) => {
-        setCertificateName(e.target.files?.[0]?.name || null);
+        setCertificatePath(e.target.files?.[0]?.name || null);
+    };
+
+    const handleSubmit = async () => {
+        try {
+            const payload = {
+                emailId,
+                password,
+                firstName,
+                lastName,
+                certificatePath,
+                specialization,
+                termsAccepted: termsAcc,
+                role
+            };
+
+            const response = await register(payload);
+                navigate("/");
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     return (
         <div className="w-full max-w-md space-y-6">
             <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">Create your account</h1>
-                <p className="mt-2 text-muted-foreground">Join MediTrack to manage patient care seamlessly.</p>
+                <p className="mt-2 text-muted-foreground">
+                    Join MediTrack to manage patient care seamlessly.
+                </p>
             </div>
 
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+                {/* Name fields */}
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="firstName">First Name</Label>
-                        <Input id="firstName" placeholder="John" required />
+                        <Input id="firstName" placeholder="John" required value={firstName} onChange={(e) => setFirstName(e.target.value)} />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="lastName">Last Name</Label>
-                        <Input id="lastName" placeholder="Doe" required />
+                        <Input id="lastName" placeholder="Doe" required value={lastName} onChange={(e) => setLastName(e.target.value)} />
                     </div>
                 </div>
 
+                {/* Role */}
                 <div className="space-y-2">
                     <Label htmlFor="role">Account Type</Label>
-                    <Select onValueChange={setRole} required className="cursor-pointer">
-                        <SelectTrigger id="role" className="cursor-pointer">
-                            <SelectValue placeholder="Select your role" className="cursor-pointer"/>
+                    <Select onValueChange={setRole} required>
+                        <SelectTrigger id="role">
+                            <SelectValue placeholder="Select your role" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="patient" className="cursor-pointer">Patient</SelectItem>
-                            <SelectItem value="doctor" className="cursor-pointer">Doctor</SelectItem>
+                            <SelectItem value="patient">Patient</SelectItem>
+                            <SelectItem value="doctor">Doctor</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
 
-                {role === 'doctor' && <DoctorFields onFileChange={handleFileChange} fileName={certificateName} />}
+                {/* Doctor-specific fields */}
+                {role === 'doctor' && (
+                    <DoctorFields
+                        onFileChange={handleFileChange}
+                        fileName={certificatePath}
+                        onSpecializationChange={setSpecialization}
+                    />
+                )}
 
+                {/* Email */}
                 <div className="space-y-2">
                     <Label htmlFor="email">Email address</Label>
                     <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <Input id="email" type="email" placeholder="john.doe@example.com" required className="pl-10" />
+                        <Input id="email" type="email" placeholder="john.doe@example.com" required className="pl-10" value={emailId} onChange={(e) => setEmailId(e.target.value)} />
                     </div>
                 </div>
 
+                {/* Password */}
                 <div className="space-y-2">
                     <Label htmlFor="password">Password</Label>
                     <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <Input id="password" type={showPassword ? 'text' : 'password'} required className="pl-10 pr-10" placeholder="···········"/>
+                        <Input id="password" type={showPassword ? 'text' : 'password'} required className="pl-10 pr-10" placeholder="···········" value={password} onChange={(e) => setPassword(e.target.value)} />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                         >
                           {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
                     </div>
                 </div>
 
+                {/* Terms */}
                 <div className="flex items-start space-x-2 pt-2">
-                    <Checkbox id="terms" required />
+                    <Checkbox id="terms" required checked={termsAcc} onCheckedChange={setTermsAcc} />
                     <div className="grid gap-1.5 leading-none">
-                        <label htmlFor="terms" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                        <label htmlFor="terms" className="text-sm font-medium">
                             Accept terms and conditions
                         </label>
                         <p className="text-sm text-muted-foreground">
@@ -151,26 +193,10 @@ function RegisterForm() {
                     </div>
                 </div>
 
-                <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer">
+                <Button type="submit" className="w-full">
                     Create Account
                 </Button>
             </form>
-
-            <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">Or</span>
-                </div>
-            </div>
-
-            <p className="text-center text-sm text-muted-foreground">
-                Already have an account?{' '}
-                <a className="font-semibold text-primary hover:underline cursor-pointer" onClick={() => navigate("/")}>
-                    Sign In
-                </a>
-            </p>
         </div>
     );
 }

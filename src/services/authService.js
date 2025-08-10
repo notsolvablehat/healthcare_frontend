@@ -15,6 +15,21 @@ export const login = async (payload) => {
     }
 }
 
+export const register = async (payload) => {
+    const {emailId, password, firstName, lastName, certificatePath, specialization, termsAccepted, role} = payload;
+    try {
+
+        const response = await axios.post(`${import.meta.env.VITE_BASE_API_URL}/onboarding`, {emailId, password, firstName, lastName, certificatePath, specialization, termsAccepted, role }, {withCredentials: true});
+        return response.data;
+
+    } catch (error) {
+
+        console.log(error);
+        return response.data;
+
+    }
+}
+
 export const getMe = async () => {
     try {
 

@@ -16,6 +16,12 @@ export function UserRoutes() {
 
             <Route element={<PrivateRoute />}>
                 <Route path="/profile" element={<LayoutScreen screen={'Profile'} />} />
+                <Route path="/diabetes" element={<LayoutScreen screen={'Diabetes'} />} />
+                <Route path="/dashboard" element={<LayoutScreen screen={'Diabetes'} />} />
+                <Route path="/statistics" element={<LayoutScreen screen={'Statistics'} />} />
+                <Route path="/messages" element={<LayoutScreen screen={'Messages'} />} />
+                <Route path="/appointments" element={<LayoutScreen screen={'Appointments'} />} />
+                <Route path="/doctors" element={<LayoutScreen screen={'Doctors'} />} />
             </Route>
 
             <Route path="*" element={<ErrorRoute />} />

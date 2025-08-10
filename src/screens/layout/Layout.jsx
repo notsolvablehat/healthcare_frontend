@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Bell,
   Search,
@@ -15,10 +15,12 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import ProfileScreen from "../ProfileScreen";
+import ProfileScreen from "../profile-screens/ProfileScreen";
 import { logout } from "../../services/authService";
+import { useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
+import DiabetesDashboard from "../DiabetesDashboard";
 
-// Helper for menu icons
 const menuIcons = {
   Dashboard: LayoutDashboard,
   Doctors: Users,
@@ -32,9 +34,18 @@ const menuIcons = {
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const [activeItem, setActiveItem] = useState("Dashboard");
+  const navigate = useNavigate();
+  const location = useLocation();
+  const url = location.pathname;
+
+  useEffect(() => {
+    const path = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
+    setActiveItem(path.charAt(0).toUpperCase() + path.slice(1));
+  }, [location.pathname]);
 
   const handleItemClick = (itemName) => {
     setActiveItem(itemName);
+    navigate("/"+itemName.toLowerCase())
     console.log(`${itemName} clicked`);
   };
 
@@ -51,10 +62,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const menuItems = {
     Main: ["Dashboard", "Doctors", "Appointments", "Messages"],
     Analytics: ["Statistics"],
-    Departments: ["Cardiology"],
+    Departments: ["Diabetes"],
     Account: ["Profile", "Settings"],
   };
-
+  const user = useSelector(state => state.user.personalInfo.data);
+  const imageUrl = `https://placehold.co/40x40/c2c2c2/000000?text=${user.firstName?.charAt(0) + user.lastName?.charAt(0)}`;
   return (
     <div
       className={`fixed top-0 left-0 h-screen bg-background text-foreground transition-transform duration-300 ease-in-out ${
@@ -122,13 +134,13 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       <div className="p-4 border-t border-border">
         <div className="flex items-center space-x-3 mb-4">
           <img
-            src="https://placehold.co/40x40/c2c2c2/000000?text=SJ"
+            src={imageUrl}
             alt="User"
             className="w-10 h-10 rounded-full"
           />
           <div>
-            <p className="font-semibold text-sm">Dr. Sarah Johnson</p>
-            <p className="text-xs text-muted-foreground">Cardiologist</p>
+            <p className="font-semibold text-sm">{user.firstName + " " +user.lastName}</p>
+            <p className="text-xs text-muted-foreground">{user.role || ""}</p>
           </div>
           <button
             onClick={handleLogout}
@@ -143,6 +155,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 };
 
 const Header = ({ toggleSidebar }) => {
+  const user = useSelector(state => state.user.personalInfo.data);
+  const imageUrl = `https://placehold.co/40x40/c2c2c2/000000?text=${user.firstName?.charAt(0) + user.lastName?.charAt(0)}`;
   return (
     <header className="bg-background p-4 border-b border-border flex items-center justify-between lg:justify-end">
       {/* Mobile menu button */}
@@ -181,12 +195,12 @@ const Header = ({ toggleSidebar }) => {
           {/* Profile */}
           <div className="flex items-center space-x-2 cursor-pointer">
             <img
-              src="https://placehold.co/40x40/c2c2c2/000000?text=SJ"
+              src={imageUrl}
               alt="User"
               className="w-8 h-8 rounded-full"
             />
             <span className="font-semibold hidden lg:inline">
-              Dr. Sarah Johnson
+              {user.firstName + " " + user.lastName}
             </span>
             <ChevronDown
               className="text-muted-foreground hidden lg:inline"
@@ -215,7 +229,16 @@ const Layout = ({ children }) => {
 };
 
 export default function LayoutScreen({ screen }) {
-  const [currentPage] = useState(screen);
-  const screens = { Profile: <ProfileScreen /> };
-  return <Layout>{screens[currentPage] || <div>Select a page</div>}</Layout>;
+  
+  const screens = { 
+    Profile: <ProfileScreen />, 
+    Diabetes: <DiabetesDashboard />,
+    Doctors: <div>Doctor Profiles Under Contruction</div>,
+    Statistics: <div>Statistics Under Contruction</div>,
+    Messages: <div>Messages Under Contruction</div>,
+    Appointments: <div>Appointments Under Contruction</div>,
+  };
+
+  return <Layout>{screens[screen] || <div>Select a page</div>}</Layout>;
 }
+

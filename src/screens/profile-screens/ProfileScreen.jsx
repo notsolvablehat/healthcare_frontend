@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Heart,
   User,
@@ -8,7 +8,7 @@ import {
   Settings,
   ShieldCheck,
 } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,6 +17,8 @@ import ProfileInfo from "./ProfileInfo";
 import MedicalProfile from "./MedicalProfile";
 import AccountSettings from "./AccountSettings";
 import SecuritySettings from "./SecuritySettings";
+import FileInfoModal from "../../components/modal/FileInfoModal";
+import { updateMedicalData, updatePersonalData } from "../../redux/userSlice";
 
 const ProfileScreen = () => {
   const [activeTab, setActiveTab] = useState("personal-information");
@@ -25,8 +27,15 @@ const ProfileScreen = () => {
   const [originalFormData, setOriginalFormData] = useState(null);
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [completionDetails, setCompletionDetails] = useState({});
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
 
-  const profileData = useSelector((state) => state.user.personalInfo);
+  const profileData = useSelector((state) => state.user.personalInfo.data);
+
+  const fileInputRef = useRef();
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (profileData && Object.keys(profileData).length > 0) {
@@ -35,6 +44,7 @@ const ProfileScreen = () => {
         email: profileData.emailId || "",
         phone: profileData.primaryPhone || "",
         dob: profileData.dateOfBirth || "",
+        role: profileData.role || "",
         gender: profileData.gender?.toLowerCase() || "",
         bloodType: profileData.bloodType || "",
         street: profileData.address?.street || "",
@@ -43,10 +53,10 @@ const ProfileScreen = () => {
         zip: profileData.address?.zipCode || "",
         country: profileData.address?.country?.toLowerCase() || "",
         contactName: profileData.emergencyContact?.name || "",
-        relationship: profileData.emergencyContact?.relatioship || "",
+        relationship: profileData.emergencyContact?.relationship || "",
         contactPhone: profileData.emergencyContact?.phone || "",
         bio: profileData.biography || "",
-        specialization: profileData.specialization || "Specialist",
+        specialization: profileData.specialization || "",
         avatar: profileData.avatar || "",
       };
       setFormData(mappedData);
@@ -100,10 +110,40 @@ const ProfileScreen = () => {
   };
 
   const handleSavePersonalInfo = () => {
-    console.log("Profile data saved:", formData);
+    const [firstName = "", lastName = ""] = (formData.fullName || "").split(" ");
+
+    const updatedProfileData = {
+      firstName,
+      lastName,
+      role: formData.role || "",
+      specialization: formData.specialization || "",
+      emailId: formData.email || "",
+      primaryPhone: formData.phone || "",
+      biography: formData.bio || "",
+      bloodType: formData.bloodType || "",
+      dateOfBirth: formData.dob || "",
+      gender: formData.gender || "",
+      avatar: formData.avatar || "",
+      address: {
+        street: formData.street || "",
+        city: formData.city || "",
+        state: formData.state || "",
+        zipCode: formData.zip || "",
+        country: formData.country || ""
+      },
+      emergencyContact: {
+        name: formData.contactName || "",
+        relationship: formData.relationship || "",
+        phone: formData.contactPhone || ""
+      }
+    };
+
+    dispatch(updatePersonalData(updatedProfileData))
+
     setIsEditingPersonalInfo(false);
     setOriginalFormData(null);
   };
+
 
   const handleCancelEdit = () => {
     if (originalFormData) {
@@ -127,8 +167,37 @@ const ProfileScreen = () => {
 
   const getInitials = (name = "") => (name.match(/\b\w/g) || []).slice(0, 2).join("").toUpperCase();
 
+  const handleFileUpload = () => {
+    fileInputRef.current.click();
+  }
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setSelectedFile(file);
+    setIsModalOpen(true);
+
+    e.target.value = null;
+  };
+
+  const handleModalConfirm = (finalChanges) => {
+    console.log("Final Changes from Modal:", finalChanges.medicalProfile);
+    dispatch(updateMedicalData(finalChanges.medicalProfile));
+    setIsModalOpen(false);
+  };
+
   return (
     <div className="px-6 md:px-10 bg-slate-50 min-h-screen py-8">
+      {/* --- MODAL --- */}
+      <FileInfoModal
+        isOpen={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        file={selectedFile}
+        onConfirm={handleModalConfirm}
+      />
+      {/* --- END MODAL --- */}
+      
       <div className="bg-white rounded-lg p-8 mb-6 border border-gray-200">
         <h1 className="text-2xl font-bold">User Profile</h1>
         <p className="text-sm text-gray-500 mb-6">
@@ -166,10 +235,11 @@ const ProfileScreen = () => {
             </div>
           </div>
           <div className="flex space-x-2 mt-4 md:mt-0">
-            <Button variant="secondary" className="flex items-center space-x-2">
+            <Button variant="secondary" className="flex items-center space-x-2" onClick={handleFileUpload}>
               <Download size={16} />
               <span>Import Data</span>
             </Button>
+            <input type="file" ref={fileInputRef} accept=".pdf, .txt, .docx" style={{display: "none"}} onChange={handleFileChange}/>
           </div>
         </div>
       </div>
