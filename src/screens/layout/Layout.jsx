@@ -19,7 +19,7 @@ import ProfileScreen from "../profile-screens/ProfileScreen";
 import { logout } from "../../services/authService";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import DiabetesDashboard from "../DiabetesDashboard";
+import DashboardEntryPoint from "../dashboards/diabetes/DiabetesDashboard";
 
 const menuIcons = {
   Dashboard: LayoutDashboard,
@@ -232,7 +232,7 @@ export default function LayoutScreen({ screen }) {
   
   const screens = { 
     Profile: <ProfileScreen />, 
-    Diabetes: <DiabetesDashboard />,
+    Diabetes: <DashboardEntryPoint />,
     Doctors: <div>Doctor Profiles Under Contruction</div>,
     Statistics: <div>Statistics Under Contruction</div>,
     Messages: <div>Messages Under Contruction</div>,
